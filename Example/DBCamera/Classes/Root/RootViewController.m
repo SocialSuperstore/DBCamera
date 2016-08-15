@@ -33,7 +33,7 @@
     [self.navigationItem setTitle:@"Detail"];
     
     _imageView = [[UIImageView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-    [_imageView setAutoresizingMask:UIViewAutoresizingFlexibleHeight];
+    [_imageView setAutoresizingMask:UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth];
     [_imageView setContentMode:UIViewContentModeScaleAspectFit];
     [self.view addSubview:_imageView];
 }

@@ -11,7 +11,7 @@
 #import "DBCollectionViewCell.h"
 #import "DBLibraryManager.h"
 
-#define kDBLibraryColumnsNumber 3
+#define kDBLibraryMinItemSize 100.0
 
 
 @interface DBCameraCollectionViewController () <UICollectionViewDataSource, UICollectionViewDelegate> {
@@ -58,6 +58,24 @@
     // Dispose of any resources that can be recreated.
 }
 
+- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
+    
+    [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
+    
+    [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context)
+     {
+         _collectionView.frame = CGRectMake(0.0, 0.0, size.width, size.height);
+         
+         UICollectionViewLayout *layout = _collectionView.collectionViewLayout;
+         [layout invalidateLayout];
+         
+         [_collectionView layoutIfNeeded];
+         
+         [_collectionView reloadData];
+         
+     } completion:^(id<UIViewControllerTransitionCoordinatorContext> context) {}];
+}
+
 #pragma mark - UICollectionViewDataSource
 
 - (NSInteger) collectionView:(UICollectionView *)view numberOfItemsInSection:(NSInteger)section
@@ -69,6 +87,7 @@
 {
     DBCollectionViewCell *item = [collectionView dequeueReusableCellWithReuseIdentifier:_collectionIdentifier forIndexPath:indexPath];
     [item.itemImage setImage:nil];
+    item.itemImage.frame = item.bounds;
     
     if ( _items.count > 0) {
         __weak DBCollectionViewCell *blockItem = item;
@@ -83,7 +102,11 @@
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    return CGSizeMake((_collectionView.frame.size.width / kDBLibraryColumnsNumber) - 1.0f, (_collectionView.frame.size.width / kDBLibraryColumnsNumber) - 1.0f);
+    CGSize size = collectionView.frame.size;
+    NSUInteger maxItems = floor(size.width / kDBLibraryMinItemSize);
+    CGFloat itemWidth = (size.width - (maxItems - 1) * 1.0) / maxItems;
+    
+    return CGSizeMake(itemWidth, itemWidth);
 }
 
 #pragma mark - UICollectionViewDelegate

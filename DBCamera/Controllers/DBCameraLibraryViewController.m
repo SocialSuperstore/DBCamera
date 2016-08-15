@@ -31,6 +31,7 @@
 
 @interface DBCameraLibraryViewController () <UIPageViewControllerDataSource, UIPageViewControllerDelegate, DBCameraCollectionControllerDelegate> {
     NSMutableArray *_items;
+    UIButton *_closeButton;
     UILabel *_titleLabel, *_pageLabel;
     NSMutableDictionary *_containersMapping;
     UIPageViewController *_pageViewController;
@@ -267,14 +268,14 @@
         _topContainerBar = [[UIView alloc] initWithFrame:(CGRect){ 0, 0, CGRectGetWidth(self.view.bounds), 65 }];
         [_topContainerBar setBackgroundColor:RGBColor(0x000000, 1)];
         
-        UIButton *closeButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        [closeButton setBackgroundColor:[UIColor clearColor]];
-        [closeButton setImage:[[UIImage imageInBundleNamed:@"close"] tintImageWithColor:self.tintColor] forState:UIControlStateNormal];
-        [closeButton setFrame:(CGRect){ 10, 10, 45, 45 }];
-        [closeButton addTarget:self action:@selector(close) forControlEvents:UIControlEventTouchUpInside];
-        [_topContainerBar addSubview:closeButton];
+        _closeButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        [_closeButton setBackgroundColor:[UIColor clearColor]];
+        [_closeButton setImage:[[UIImage imageInBundleNamed:@"close"] tintImageWithColor:self.tintColor] forState:UIControlStateNormal];
+        [_closeButton setFrame:(CGRect){ 10, 10, 45, 45 }];
+        [_closeButton addTarget:self action:@selector(close) forControlEvents:UIControlEventTouchUpInside];
+        [_topContainerBar addSubview:_closeButton];
         
-        _titleLabel = [[UILabel alloc] initWithFrame:(CGRect){ CGRectGetMaxX(closeButton.frame), 0, CGRectGetWidth(self.view.bounds) - (CGRectGetWidth(closeButton.bounds) * 2), CGRectGetHeight(_topContainerBar.bounds) }];
+        _titleLabel = [[UILabel alloc] initWithFrame:(CGRect){ CGRectGetMaxX(_closeButton.frame), 0, CGRectGetWidth(self.view.bounds) - (CGRectGetWidth(_closeButton.bounds) * 2), CGRectGetHeight(_topContainerBar.bounds) }];
         [_titleLabel setBackgroundColor:[UIColor clearColor]];
         [_titleLabel setTextColor:self.tintColor];
         [_titleLabel setFont:[UIFont systemFontOfSize:12]];
@@ -299,6 +300,23 @@
     }
     
     return _bottomContainerBar;
+}
+
+- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
+    
+    [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
+ 
+    [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context)
+     {
+         _topContainerBar.frame = CGRectMake(0, 0, size.width, 65);
+         _titleLabel.frame = CGRectMake(CGRectGetMaxX(_closeButton.frame), 0, CGRectGetWidth(self.view.bounds) - (CGRectGetWidth(_closeButton.bounds) * 2), CGRectGetHeight(_topContainerBar.bounds));
+         _bottomContainerBar.frame = CGRectMake(0, size.height - 30, size.width, 30);
+         _pageLabel.frame = _bottomContainerBar.bounds;
+         
+         [_pageViewController.view setFrame:CGRectMake(0.0, CGRectGetMaxY(_topContainerBar.frame), size.width, size.height - (CGRectGetHeight(_topContainerBar.frame) + CGRectGetHeight(_bottomContainerBar.frame)))];
+         
+     } completion:^(id<UIViewControllerTransitionCoordinatorContext> context) {}];
+    
 }
 
 #pragma mark - UIPageViewControllerDataSource Method
@@ -339,12 +357,18 @@
     [self setSelectedItemID:_items[itemIndex][@"propertyID"]];
 }
 
+- (UIInterfaceOrientationMask)pageViewControllerSupportedInterfaceOrientations:(UIPageViewController *)pageViewController {
+    
+    return UIInterfaceOrientationMaskAll;
+}
+
 #pragma mark - DBCameraCollectionControllerDelegate
 
 - (void) collectionView:(UICollectionView *)collectionView itemURL:(NSURL *)URL
 {
     dispatch_async(dispatch_get_main_queue(), ^{
         [self.view addSubview:self.loading];
+        [_loading setCenter:self.view.center];
 
         __weak typeof(self) weakSelf = self;
         [[[DBLibraryManager sharedInstance] defaultAssetsLibrary] assetForURL:URL resultBlock:^(ALAsset *asset) {
