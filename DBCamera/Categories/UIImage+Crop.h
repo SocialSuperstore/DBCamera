@@ -57,4 +57,13 @@
  *  @return the new UIImage
  */
 + (UIImage *) returnImage:(UIImage *)img withSize:(CGSize)finalSize;
+
+/**
+ * Resize a UIImage to CGSize but fill with aspect preservation
+ * 
+ * @param finalSize the new CGSize
+ *
+ * @return the new UIImage
+ */
+- (UIImage *) scaledToFillSize:(CGSize)size;
 @end

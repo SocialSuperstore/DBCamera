@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "DBCameraViewController.h"
 
-@interface RootViewController : UIViewController
+@interface RootViewController : UIViewController <DBCameraViewControllerDelegate>
 @end

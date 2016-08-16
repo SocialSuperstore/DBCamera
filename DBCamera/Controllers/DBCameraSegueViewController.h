@@ -42,6 +42,11 @@
 @property (nonatomic, strong) NSDictionary *cropAspects;
 
 /**
+ * A title for the retake button
+ */
+@property (nonatomic, strong) NSString *retakeButtonTitle;
+
+/**
  *  Filter to be applied to the image
  */
 @property (nonatomic, readonly) NSIndexPath *selectedFilterIndex;
@@ -50,11 +55,10 @@
  *  The init method with the captured image and thumb
  *
  *  @param image The captured image
- *  @param thumb The thumb of the captured image
  *
  *  @return A DBCameraSegueViewController
  */
-- (id) initWithImage:(UIImage *)image thumb:(UIImage *)thumb;
+- (id) initWithImage:(UIImage *)image;
 
 /**
  *  Create the interface of the view controller

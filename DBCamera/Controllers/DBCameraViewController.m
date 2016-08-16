@@ -311,15 +311,7 @@
         if ( [_delegate respondsToSelector:@selector(camera:didFinishWithImage:withMetadata:)] )
             [_delegate camera:self didFinishWithImage:image withMetadata:finalMetadata];
     } else {
-        CGFloat newW = 256.0;
-        CGFloat newH = 340.0;
-
-        if ( image.size.width > image.size.height ) {
-            newW = 340.0;
-            newH = ( newW * image.size.height ) / image.size.width;
-        }
-
-        DBCameraSegueViewController *segue = [[DBCameraSegueViewController alloc] initWithImage:image thumb:[UIImage returnImage:image withSize:(CGSize){ newW, newH }]];
+        DBCameraSegueViewController *segue = [[DBCameraSegueViewController alloc] initWithImage:image];
         [segue setTintColor:self.tintColor];
         [segue setSelectedTintColor:self.selectedTintColor];
         [segue enableGestures:YES];

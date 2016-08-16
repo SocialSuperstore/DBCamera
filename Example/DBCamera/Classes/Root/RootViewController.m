@@ -15,6 +15,8 @@
 #import "CustomCamera.h"
 #import "DBCameraGridView.h"
 
+@import Photos;
+
 @interface DetailViewController : UIViewController {
     UIImageView *_imageView;
 }
@@ -63,7 +65,7 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #define kCellIdentifier @"CellIdentifier"
-#define kCameraTitles @[ @"Open Camera", @"Open Custom Camera", @"Open Camera without Segue", @"Open Camera without Container", @"Open Library Picker" ]
+#define kCameraTitles @[ @"Open Camera", @"Open Custom Camera", @"Open Camera without Segue", @"Open Camera without Container", @"Open Library Picker", @"Open Crop without Camera" ]
 
 typedef void (^TableRowBlock)();
 
@@ -82,7 +84,7 @@ typedef void (^TableRowBlock)();
     if ( self ) {
         _actionMapping = @{ @0:^{ [self openCamera]; }, @1:^{ [self openCustomCamera]; },
                             @2:^{ [self openCameraWithoutSegue]; }, @3:^{ [self openCameraWithoutContainer]; },
-                            @4:^{ [self openLibrary]; } };
+                            @4:^{ [self openLibrary]; }, @5:^{ [self openSegue]; } };
     }
     
     return self;
@@ -190,6 +192,36 @@ typedef void (^TableRowBlock)();
     UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:vc];
     [nav setNavigationBarHidden:YES];
     [self presentViewController:nav animated:YES completion:nil];
+}
+
+- (void) openSegue
+{
+    PHFetchOptions *options = [[PHFetchOptions alloc] init];
+    options.fetchLimit = 1;
+
+    PHFetchResult *assets = [PHAsset fetchAssetsWithOptions:options];
+    
+    if (assets.count > 0) {
+        PHAsset *asset = [assets lastObject];
+        
+        PHImageRequestOptions *requestOptions = [[PHImageRequestOptions alloc] init];
+        requestOptions.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
+        
+        [[PHImageManager defaultManager]
+         requestImageForAsset:asset
+         targetSize:CGSizeMake(1024, 1024)
+         contentMode:PHImageContentModeAspectFit
+         options:requestOptions
+         resultHandler:^(UIImage *image, NSDictionary *meta) {
+             
+             dispatch_async(dispatch_get_main_queue(), ^(void){
+                 DBCameraSegueViewController *vc = [[DBCameraSegueViewController alloc] initWithImage:image];
+                 vc.retakeButtonTitle = @"Cancel";
+                 vc.delegate = self;
+                 [self.navigationController presentViewController:vc animated:YES completion:nil];
+             });
+         }];
+    }
 }
 
 #pragma mark - UITableViewDataSource & UITableViewDelegate

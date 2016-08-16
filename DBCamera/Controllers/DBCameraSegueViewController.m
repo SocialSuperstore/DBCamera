@@ -14,9 +14,14 @@
 #import "DBCameraLoadingView.h"
 #import "UIImage+TintColor.h"
 #import "UIImage+Bundle.h"
+#import "UIImage+Crop.h"
 #import "GrayscaleContrastFilter.h"
 
+
 #import <GPUImage/GPUImage.h>
+
+@import Photos;
+@import PhotosUI;
 
 #define kFilterCellIdentifier @"filterCell"
 
@@ -51,8 +56,9 @@ static const CGSize kFilterCellSize = { 75, 90 };
 @synthesize selectedTintColor = _selectedTintColor;
 @synthesize cameraSegueConfigureBlock = _cameraSegueConfigureBlock;
 @synthesize cropAspects = _cropAspects;
+@synthesize retakeButtonTitle = _retakeButtonTitle;
 
-- (id) initWithImage:(UIImage *)image thumb:(UIImage *)thumb
+- (id) initWithImage:(UIImage *)image
 {
     self = [super init];
     if (self) {
@@ -83,6 +89,9 @@ static const CGSize kFilterCellSize = { 75, 90 };
         
         _selectedFilterIndex = 0;
         
+        
+        UIImage *thumb = [image scaledToFillSize:CGSizeMake(100, 100)];
+
         [self setSourceImage:image];
         [self setPreviewImage:thumb];
         [self setCropRect:(CGRect){ 0, 320 }];
@@ -184,7 +193,10 @@ static const CGSize kFilterCellSize = { 75, 90 };
 
 - (void) retakeImage
 {
-    [self.navigationController popViewControllerAnimated:YES];
+    if ([self.navigationController popViewControllerAnimated:YES] == nil) {
+        [self dismissViewControllerAnimated:YES completion:nil];
+    }
+    
     [self setSourceImage:nil];
     [self setPreviewImage:nil];
 }
@@ -301,8 +313,12 @@ static const CGSize kFilterCellSize = { 75, 90 };
 - (UIButton *) retakeButton
 {
     if ( !_retakeButton ) {
+        NSString *title = DBCameraLocalizedStrings(@"button.retake");
+        if (_retakeButtonTitle != nil) {
+            title = _retakeButtonTitle;
+        }
         _retakeButton = [self baseButton];
-        [_retakeButton setTitle:[DBCameraLocalizedStrings(@"button.retake") uppercaseString] forState:UIControlStateNormal];
+        [_retakeButton setTitle:[title uppercaseString] forState:UIControlStateNormal];
         [_retakeButton.titleLabel sizeToFit];
         [_retakeButton sizeToFit];
         [_retakeButton setFrame:(CGRect){ 0, 0, CGRectGetWidth(_retakeButton.frame) + buttonMargin, 60 }];
