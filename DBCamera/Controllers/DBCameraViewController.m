@@ -39,7 +39,6 @@
 
 @implementation DBCameraViewController
 @synthesize cameraGridView = _cameraGridView;
-@synthesize forceQuadCrop = _forceQuadCrop;
 @synthesize tintColor = _tintColor;
 @synthesize selectedTintColor = _selectedTintColor;
 @synthesize cameraSegueConfigureBlock = _cameraSegueConfigureBlock;
@@ -144,8 +143,8 @@
     _cameraManager = nil;
 }
 
-- (NSUInteger)supportedInterfaceOrientations {
-    return UIInterfaceOrientationMaskPortrait | UIInterfaceOrientationMaskPortraitUpsideDown;
+- (UIInterfaceOrientationMask)supportedInterfaceOrientations {
+    return UIInterfaceOrientationMaskAll;
 }
 
 - (UIInterfaceOrientation)preferredInterfaceOrientationForPresentation {
@@ -322,7 +321,6 @@
         DBCameraSegueViewController *segue = [[DBCameraSegueViewController alloc] initWithImage:image thumb:[UIImage returnImage:image withSize:(CGSize){ newW, newH }]];
         [segue setTintColor:self.tintColor];
         [segue setSelectedTintColor:self.selectedTintColor];
-        [segue setForceQuadCrop:_forceQuadCrop];
         [segue enableGestures:YES];
         [segue setDelegate:self.delegate];
         [segue setCapturedImageMetadata:finalMetadata];
@@ -360,7 +358,6 @@
             DBCameraLibraryViewController *library = [[DBCameraLibraryViewController alloc] initWithDelegate:self.containerDelegate];
             [library setTintColor:self.tintColor];
             [library setSelectedTintColor:self.selectedTintColor];
-            [library setForceQuadCrop:_forceQuadCrop];
             [library setDelegate:self.delegate];
             [library setUseCameraSegue:self.useCameraSegue];
             [library setCameraSegueConfigureBlock:self.cameraSegueConfigureBlock];

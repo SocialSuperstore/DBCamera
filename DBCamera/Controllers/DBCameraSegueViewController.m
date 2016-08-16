@@ -29,10 +29,10 @@
 
 static const CGSize kFilterCellSize = { 75, 90 };
 
-@interface DBCameraSegueViewController () <UIActionSheetDelegate, UICollectionViewDelegate, UICollectionViewDataSource> {
+@interface DBCameraSegueViewController () <UICollectionViewDelegate, UICollectionViewDataSource> {
     DBCameraCropView *_cropView;
     
-    NSArray *_cropArray, *_filtersList;
+    NSArray *_filtersList;
     GPUImageVignetteFilter *vignetteFilter;
     GPUImageFilterGroup *vignetteFilterGroup;
     GPUImageToneCurveFilter *vignetteToneCurveFilter;
@@ -46,11 +46,11 @@ static const CGSize kFilterCellSize = { 75, 90 };
 @end
 
 @implementation DBCameraSegueViewController
-@synthesize forceQuadCrop = _forceQuadCrop;
 @synthesize useCameraSegue = _useCameraSegue;
 @synthesize tintColor = _tintColor;
 @synthesize selectedTintColor = _selectedTintColor;
 @synthesize cameraSegueConfigureBlock = _cameraSegueConfigureBlock;
+@synthesize cropAspects = _cropAspects;
 
 - (id) initWithImage:(UIImage *)image thumb:(UIImage *)thumb
 {
@@ -60,7 +60,6 @@ static const CGSize kFilterCellSize = { 75, 90 };
         
         [self initVignetteFilter];
         
-        _cropArray = @[ @320, @213, @240, @192, @180 ];
         _filtersList = @[ @"normal", @"1977", @"amaro", @"grey", @"hudson", @"mayfair", @"nashville", @"valencia", @"contrastgrey", @"vignette" ];
         
         NSBundle *bundle = [NSBundle bundleForClass:self.class];
@@ -114,6 +113,9 @@ static const CGSize kFilterCellSize = { 75, 90 };
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     
+    if( self.cameraSegueConfigureBlock )
+        self.cameraSegueConfigureBlock(self);
+    
     [self.view setUserInteractionEnabled:YES];
     [self.view setBackgroundColor:[UIColor blackColor]];
     
@@ -126,30 +128,18 @@ static const CGSize kFilterCellSize = { 75, 90 };
     [self.view addSubview:self.filtersView];
     [self.view addSubview:self.navigationBar];
     [self.view addSubview:self.bottomBar];
-    [self.view setClipsToBounds:YES];
-    
-    if( self.cameraSegueConfigureBlock )
-        self.cameraSegueConfigureBlock(self);
-}
-
-- (void) viewWillAppear:(BOOL)animated
-{
-    [super viewWillAppear:animated];
-    
-    if ( _forceQuadCrop ) {
-        [self setCropMode:YES];
-        [self setCropRect:_pFrame];
-        [self reset:YES];
-    }
-    
-    if ( _cropMode )
-        [_cropButton setSelected:YES];
+    [self.view setClipsToBounds:YES];   
 }
 
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+- (UIInterfaceOrientationMask)supportedInterfaceOrientations
+{
+    return UIInterfaceOrientationMaskPortrait;
 }
 
 - (void) cropModeAction:(UIButton *)button
@@ -162,8 +152,25 @@ static const CGSize kFilterCellSize = { 75, 90 };
 
 - (void) openActionsheet:(UIButton *)button
 {
-    UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:DBCameraLocalizedStrings(@"general.button.cancel") destructiveButtonTitle:nil otherButtonTitles:DBCameraLocalizedStrings(@"cropmode.square"), @"3:2", @"4:3", @"5:3", @"16:9", nil];
-    [actionSheet showInView:self.view];
+    UIAlertController *actionSheet = [UIAlertController alertControllerWithTitle:nil message:nil preferredStyle:UIAlertControllerStyleActionSheet];
+    
+    [actionSheet addAction:[UIAlertAction actionWithTitle:DBCameraLocalizedStrings(@"general.button.cancel") style:UIAlertActionStyleCancel handler:nil]];
+    
+    for (id key in _cropAspects) {
+        NSString *aspectTitle = [NSString stringWithFormat:@"%@", key];
+        NSNumber *aspectRatio = [NSNumber numberWithFloat:[[_cropAspects objectForKey:key] floatValue]];
+        
+        [actionSheet addAction:[UIAlertAction actionWithTitle:aspectTitle style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+            NSUInteger height = 320.0 / aspectRatio.floatValue;
+            CGFloat cropX = (CGRectGetWidth( self.frameView.frame) - 320 ) * .5;
+            CGRect cropRect = (CGRect){ cropX, ( CGRectGetHeight( self.frameView.frame) - (CGRectGetHeight(self.bottomBar.frame) + height) ) * .5, 320, height };
+            
+            [self setCropRect:cropRect];
+            [self reset:YES];
+        }]];
+    }
+    
+    [self.navigationController presentViewController:actionSheet animated:YES completion:nil];
 }
 
 - (void) createInterface
@@ -217,12 +224,8 @@ static const CGSize kFilterCellSize = { 75, 90 };
 {
     _cropMode = cropMode;
     [self.frameView setHidden:!_cropMode];
-    
-    // Only hide filters if quad crop is not forced, otherwise filters are not accessible
-    if (!_forceQuadCrop) {
-        [self.bottomBar setHidden:!_cropMode];
-        [self.filtersView setHidden:_cropMode];
-    }
+    [self.bottomBar setHidden:!_cropMode];
+    [self.filtersView setHidden:_cropMode];
 }
 
 - (DBCameraFiltersView *) filtersView
@@ -255,8 +258,7 @@ static const CGSize kFilterCellSize = { 75, 90 };
         [_navigationBar setUserInteractionEnabled:YES];
         [_navigationBar addSubview:self.useButton];
         [_navigationBar addSubview:self.retakeButton];
-        if ( !_forceQuadCrop )
-            [_navigationBar addSubview:self.cropButton];
+        [_navigationBar addSubview:self.cropButton];
     }
     
     return _navigationBar;
@@ -269,7 +271,7 @@ static const CGSize kFilterCellSize = { 75, 90 };
         [_bottomBar setBackgroundColor:[UIColor blackColor]];
         [_bottomBar setHidden:YES];
         
-        if ( !_forceQuadCrop ) {
+        if ( _cropAspects != nil && _cropAspects.count > 0) {
             UIButton *actionsheetButton = [UIButton buttonWithType:UIButtonTypeCustom];
             [actionsheetButton setFrame:_bottomBar.bounds];
             [actionsheetButton setBackgroundColor:[UIColor clearColor]];
@@ -377,18 +379,5 @@ static const CGSize kFilterCellSize = { 75, 90 };
     });
 }
 
-#pragma mark - UIActionSheetDelegate
-
-- (void) actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
-{
-    if ( buttonIndex != actionSheet.cancelButtonIndex ) {
-        NSUInteger height = [_cropArray[buttonIndex] integerValue];
-        CGFloat cropX = ( CGRectGetWidth( self.frameView.frame) - 320 ) * .5;
-        CGRect cropRect = (CGRect){ cropX, ( CGRectGetHeight( self.frameView.frame) - (CGRectGetHeight(self.bottomBar.frame) + height) ) * .5, 320, height };
-        
-        [self setCropRect:cropRect];
-        [self reset:YES];
-    }
-}
 
 @end

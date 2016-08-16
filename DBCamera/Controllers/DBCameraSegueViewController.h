@@ -37,6 +37,11 @@
 @property (nonatomic, strong) DBCameraFiltersView *filtersView;
 
 /**
+ * A list of aspect ratios to supply to the user. Dictionary keys are the visible label, values are the aspect ratio as a decimal
+ */
+@property (nonatomic, strong) NSDictionary *cropAspects;
+
+/**
  *  Filter to be applied to the image
  */
 @property (nonatomic, readonly) NSIndexPath *selectedFilterIndex;

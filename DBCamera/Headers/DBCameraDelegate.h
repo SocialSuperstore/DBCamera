@@ -157,10 +157,6 @@
  *  DBCameraSegueSettings protocol
  */
 @protocol DBCameraSegueSettings <NSObject>
-/**
- *  Set if the Camera Segue has a force quad crop mode
- */
-@property (nonatomic, assign) BOOL forceQuadCrop;
 
 /**
  *  Set if Camera View Controller will use the camera segue

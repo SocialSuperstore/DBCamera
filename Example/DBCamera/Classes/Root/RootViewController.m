@@ -11,6 +11,7 @@
 #import "DBCameraViewController.h"
 #import "DBCameraContainerViewController.h"
 #import "DBCameraLibraryViewController.h"
+#import "DBCameraSegueViewController.h"
 #import "CustomCamera.h"
 #import "DBCameraGridView.h"
 
@@ -62,7 +63,7 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #define kCellIdentifier @"CellIdentifier"
-#define kCameraTitles @[ @"Open Camera", @"Open Custom Camera", @"Open Camera without Segue", @"Open Camera without Container", @"Camera with force quad crop", @"Open Library Picker" ]
+#define kCameraTitles @[ @"Open Camera", @"Open Custom Camera", @"Open Camera without Segue", @"Open Camera without Container", @"Open Library Picker" ]
 
 typedef void (^TableRowBlock)();
 
@@ -81,7 +82,7 @@ typedef void (^TableRowBlock)();
     if ( self ) {
         _actionMapping = @{ @0:^{ [self openCamera]; }, @1:^{ [self openCustomCamera]; },
                             @2:^{ [self openCameraWithoutSegue]; }, @3:^{ [self openCameraWithoutContainer]; },
-                            @4:^{ [self openCameraWithForceQuad]; }, @5:^{ [self openLibrary]; } };
+                            @4:^{ [self openLibrary]; } };
     }
     
     return self;
@@ -139,6 +140,15 @@ typedef void (^TableRowBlock)();
 
     DBCameraContainerViewController *cameraContainer = [[DBCameraContainerViewController alloc] initWithDelegate:self];
     [cameraContainer setFullScreenMode];
+    cameraContainer.cameraViewController.cameraSegueConfigureBlock = ^(DBCameraSegueViewController *segue) {
+        
+        NSNumber *oneToOne = [NSNumber numberWithFloat:1.0];
+        NSNumber *threeToTwo = [NSNumber numberWithFloat:1.5];
+        NSNumber *twoToThree = [NSNumber numberWithFloat:0.666];
+        
+        NSDictionary *dict = [[NSDictionary alloc] initWithObjectsAndKeys:oneToOne, @"Square", threeToTwo, @"Landscape", twoToThree, @"Portrait", nil];
+        segue.cropAspects = dict;
+    };
     
     DemoNavigationController *nav = [[DemoNavigationController alloc] initWithRootViewController:cameraContainer];
     [self presentViewController:nav animated:YES completion:nil];
@@ -167,19 +177,6 @@ typedef void (^TableRowBlock)();
     [self presentViewController:nav animated:YES completion:nil];
 }
 
-- (void) openCameraWithForceQuad
-{
-    DBCameraViewController *cameraController = [DBCameraViewController initWithDelegate:self];
-    [cameraController setForceQuadCrop:YES];
-    
-    DBCameraContainerViewController *container = [[DBCameraContainerViewController alloc] initWithDelegate:self];
-    [container setCameraViewController:cameraController];
-    [container setFullScreenMode];
-
-    DemoNavigationController *nav = [[DemoNavigationController alloc] initWithRootViewController:container];
-    [self presentViewController:nav animated:YES completion:nil];
-}
-
 - (void) openCameraWithoutContainer
 {
     DemoNavigationController *nav = [[DemoNavigationController alloc] initWithRootViewController:[DBCameraViewController initWithDelegate:self]];
@@ -190,7 +187,6 @@ typedef void (^TableRowBlock)();
 {
     DBCameraLibraryViewController *vc = [[DBCameraLibraryViewController alloc] init];
     [vc setDelegate:self]; //DBCameraLibraryViewController must have a DBCameraViewControllerDelegate object
-//    [vc setForceQuadCrop:YES]; //Optional
 //    [vc setUseCameraSegue:YES]; //Optional
     UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:vc];
     [nav setNavigationBarHidden:YES];

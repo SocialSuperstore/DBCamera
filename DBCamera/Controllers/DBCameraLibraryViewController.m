@@ -46,7 +46,6 @@
 
 @implementation DBCameraLibraryViewController
 @synthesize cameraSegueConfigureBlock = _cameraSegueConfigureBlock;
-@synthesize forceQuadCrop = _forceQuadCrop;
 @synthesize useCameraSegue = _useCameraSegue;
 @synthesize tintColor = _tintColor;
 @synthesize selectedTintColor = _selectedTintColor;
@@ -389,7 +388,6 @@
                 DBCameraSegueViewController *segue = [[DBCameraSegueViewController alloc] initWithImage:image thumb:[UIImage imageWithCGImage:[asset aspectRatioThumbnail]]];
                 [segue setTintColor:self.tintColor];
                 [segue setSelectedTintColor:self.selectedTintColor];
-                [segue setForceQuadCrop:_forceQuadCrop];
                 [segue enableGestures:YES];
                 [segue setCapturedImageMetadata:metadata];
                 [segue setDelegate:weakSelf.delegate];

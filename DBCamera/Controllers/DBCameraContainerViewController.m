@@ -34,6 +34,7 @@
     if ( self ) {
         _delegate = delegate;
         _settingsBlock = block;
+        [self addChildViewController:self.defaultCameraViewController];
     }
     
     return self;
@@ -44,7 +45,6 @@
     [super viewDidLoad];
     
     [self.view setBackgroundColor:RGBColor(0x000000, 1)];
-    [self addChildViewController:self.defaultCameraViewController];
     [self.view addSubview:self.defaultCameraViewController.view];
     if ( _settingsBlock )
         _settingsBlock(self.cameraViewController.cameraView, self);
