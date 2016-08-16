@@ -49,6 +49,7 @@
 @synthesize useCameraSegue = _useCameraSegue;
 @synthesize tintColor = _tintColor;
 @synthesize selectedTintColor = _selectedTintColor;
+@synthesize cropAspects = _cropAspects;
 
 - (id) init
 {
@@ -385,12 +386,13 @@
                 if ( [weakSelf.delegate respondsToSelector:@selector(camera:didFinishWithImage:withMetadata:)] )
                     [weakSelf.delegate camera:self didFinishWithImage:image withMetadata:metadata];
             } else {
-                DBCameraSegueViewController *segue = [[DBCameraSegueViewController alloc] initWithImage:image thumb:[UIImage imageWithCGImage:[asset aspectRatioThumbnail]]];
+                __block DBCameraSegueViewController *segue = [[DBCameraSegueViewController alloc] initWithImage:image thumb:[UIImage imageWithCGImage:[asset aspectRatioThumbnail]]];
                 [segue setTintColor:self.tintColor];
                 [segue setSelectedTintColor:self.selectedTintColor];
                 [segue enableGestures:YES];
                 [segue setCapturedImageMetadata:metadata];
                 [segue setDelegate:weakSelf.delegate];
+                [segue setCropAspects:self.cropAspects];
                 [segue setCameraSegueConfigureBlock:self.cameraSegueConfigureBlock];
                 
                 [weakSelf.navigationController pushViewController:segue animated:YES];

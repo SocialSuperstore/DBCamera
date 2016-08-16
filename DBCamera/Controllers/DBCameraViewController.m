@@ -43,6 +43,7 @@
 @synthesize selectedTintColor = _selectedTintColor;
 @synthesize cameraSegueConfigureBlock = _cameraSegueConfigureBlock;
 @synthesize cameraManager = _cameraManager;
+@synthesize cropAspects = _cropAspects;
 
 #pragma mark - Life cycle
 
@@ -324,6 +325,7 @@
         [segue enableGestures:YES];
         [segue setDelegate:self.delegate];
         [segue setCapturedImageMetadata:finalMetadata];
+        [segue setCropAspects:self.cropAspects];
         [segue setCameraSegueConfigureBlock:self.cameraSegueConfigureBlock];
 
         [self.navigationController pushViewController:segue animated:YES];
@@ -360,6 +362,7 @@
             [library setSelectedTintColor:self.selectedTintColor];
             [library setDelegate:self.delegate];
             [library setUseCameraSegue:self.useCameraSegue];
+            [library setCropAspects:self.cropAspects];
             [library setCameraSegueConfigureBlock:self.cameraSegueConfigureBlock];
             [library setLibraryMaxImageSize:self.libraryMaxImageSize];
             [self.containerDelegate switchFromController:self toController:library];

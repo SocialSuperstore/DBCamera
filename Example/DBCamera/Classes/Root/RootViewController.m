@@ -140,15 +140,14 @@ typedef void (^TableRowBlock)();
 
     DBCameraContainerViewController *cameraContainer = [[DBCameraContainerViewController alloc] initWithDelegate:self];
     [cameraContainer setFullScreenMode];
-    cameraContainer.cameraViewController.cameraSegueConfigureBlock = ^(DBCameraSegueViewController *segue) {
-        
-        NSNumber *oneToOne = [NSNumber numberWithFloat:1.0];
-        NSNumber *threeToTwo = [NSNumber numberWithFloat:1.5];
-        NSNumber *twoToThree = [NSNumber numberWithFloat:0.666];
-        
-        NSDictionary *dict = [[NSDictionary alloc] initWithObjectsAndKeys:oneToOne, @"Square", threeToTwo, @"Landscape", twoToThree, @"Portrait", nil];
-        segue.cropAspects = dict;
-    };
+    
+    NSNumber *oneToOne = [NSNumber numberWithFloat:1.0];
+    NSNumber *threeToTwo = [NSNumber numberWithFloat:1.5];
+    NSNumber *twoToThree = [NSNumber numberWithFloat:0.666];
+    
+    NSDictionary *dict = [[NSDictionary alloc] initWithObjectsAndKeys:oneToOne, @"Square", threeToTwo, @"Landscape", twoToThree, @"Portrait", nil];
+    
+    cameraContainer.cropAspects = dict;
     
     DemoNavigationController *nav = [[DemoNavigationController alloc] initWithRootViewController:cameraContainer];
     [self presentViewController:nav animated:YES completion:nil];

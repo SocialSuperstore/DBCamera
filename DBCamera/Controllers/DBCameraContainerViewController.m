@@ -22,6 +22,7 @@
 @implementation DBCameraContainerViewController
 @synthesize tintColor = _tintColor;
 @synthesize selectedTintColor = _selectedTintColor;
+@synthesize cropAspects = _cropAspects;
 
 - (id) initWithDelegate:(id<DBCameraViewControllerDelegate>)delegate
 {
@@ -34,7 +35,6 @@
     if ( self ) {
         _delegate = delegate;
         _settingsBlock = block;
-        [self addChildViewController:self.defaultCameraViewController];
     }
     
     return self;
@@ -45,6 +45,7 @@
     [super viewDidLoad];
     
     [self.view setBackgroundColor:RGBColor(0x000000, 1)];
+    [self addChildViewController:self.defaultCameraViewController];
     [self.view addSubview:self.defaultCameraViewController.view];
     if ( _settingsBlock )
         _settingsBlock(self.cameraViewController.cameraView, self);
@@ -100,6 +101,8 @@
             [_defaultCameraViewController setTintColor:self.tintColor];
         if ( self.selectedTintColor )
             [_defaultCameraViewController setSelectedTintColor:self.selectedTintColor];
+        if (self.cropAspects )
+            [_defaultCameraViewController setCropAspects:self.cropAspects];
     }
     
     if ( !self.cameraViewController )

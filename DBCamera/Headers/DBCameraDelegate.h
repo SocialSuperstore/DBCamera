@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import <AVFoundation/AVFoundation.h>
+
 /**
  *  DBCameraView delegate protocol
  */
@@ -182,4 +183,10 @@
  *  Set the tint color of icons and labels for the selected state
  */
 @property (nonatomic, strong) UIColor *selectedTintColor;
+
+/**
+ * A list of aspect ratios to supply to the user. Dictionary keys are the visible label, values are the aspect ratio as a decimal
+ */
+@property (nonatomic, strong) NSDictionary *cropAspects;
+
 @end

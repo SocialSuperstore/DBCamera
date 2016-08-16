@@ -36,6 +36,11 @@ typedef void(^CameraSettingsBlock)(DBCameraView *cameraView, id container);
 @property (nonatomic, strong) DBCameraViewController *cameraViewController;
 
 /**
+ * A list of aspect ratios to supply to the user. Dictionary keys are the visible label, values are the aspect ratio as a decimal
+ */
+@property (nonatomic, strong) NSDictionary *cropAspects;
+
+/**
  *  The init method with a DBCameraViewControllerDelegate
  *
  *  @param delegate The DBCameraViewControllerDelegate
