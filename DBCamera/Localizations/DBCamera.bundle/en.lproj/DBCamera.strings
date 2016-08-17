@@ -12,10 +12,10 @@
 "general.error.title" = "Attention";
 "general.button.cancel" = "Cancel";
 
-"cameraimage.nopolicy" = "Please enable the permissions in order to use your Camera. Check your permissions in Settings > Privacy > Camera";
-"cameraimage.noconnection" = "Could not connect to camera. Please check your permissions in Settings > Privacy > Camera";
+"cameraimage.nopolicy" = "Please allow permission for this app to access your Camera by tapping Settings below.";
+"cameraimage.noconnection" = "Could not connect to camera. Please check your permissions in Settings";
 
-"pickerimage.nopolicy" = "Please enable the permissions in order to use your Photo Library. Check your permissions in Settings > Privacy > Photos";
+"pickerimage.nopolicy" = "Please allow permission for this app to access your Photos by tapping Settings below.";
 "pickerimage.nophoto" = "There are no images in your Library";
 
 "pagecontrol.text" = "%i of %i";

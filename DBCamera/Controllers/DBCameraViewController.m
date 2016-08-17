@@ -128,8 +128,10 @@
 - (void) viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    if ( !self.customCamera )
-        [self checkForLibraryImage];
+    if ( !self.customCamera ) {
+        [self checkLibraryAuthorization];
+        [self checkCameraAuthorization];
+    }
 }
 
 - (void) viewWillDisappear:(BOOL)animated
@@ -152,7 +154,7 @@
     return UIInterfaceOrientationPortrait;
 }
 
-- (void) checkForLibraryImage
+- (void) checkLibraryAuthorization
 {
     if ( !self.cameraView.photoLibraryButton.isHidden && [self.parentViewController.class isSubclassOfClass:NSClassFromString(@"DBCameraContainerViewController")] ) {
         if ( [ALAssetsLibrary authorizationStatus] !=  ALAuthorizationStatusDenied ) {
@@ -164,6 +166,34 @@
     } else
         [self.cameraView.photoLibraryButton setHidden:YES];
 }
+
+- (void) checkCameraAuthorization
+{
+    AVAuthorizationStatus status = [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo];
+    
+    if(status == AVAuthorizationStatusDenied || status == AVAuthorizationStatusRestricted) {
+        [self showCameraAccessDeniedAlert];
+        
+    } else if(status == AVAuthorizationStatusNotDetermined) {
+        
+        [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
+            if(!granted) {
+                [self showCameraAccessDeniedAlert];
+            }
+        }];
+    }
+}
+
+- (void) showCameraAccessDeniedAlert
+{
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:DBCameraLocalizedStrings(@"general.error.title") message:DBCameraLocalizedStrings(@"cameraimage.nopolicy") preferredStyle:UIAlertControllerStyleAlert];
+    [alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil]];
+    [alert addAction:[UIAlertAction actionWithTitle:@"Settings" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString]];
+    }]];
+    [self presentViewController:alert animated:true completion:nil];
+}
+
 
 - (BOOL) prefersStatusBarHidden
 {
@@ -344,7 +374,7 @@
 
 - (void) openLibrary
 {
-    if ( [ALAssetsLibrary authorizationStatus] !=  ALAuthorizationStatusDenied ) {
+    if ( [ALAssetsLibrary authorizationStatus] != ALAuthorizationStatusDenied ) {
         [UIView animateWithDuration:.3 animations:^{
             [self.view setAlpha:0];
             [self.view setTransform:CGAffineTransformMakeScale(.8, .8)];
@@ -361,7 +391,12 @@
         }];
     } else {
         dispatch_async(dispatch_get_main_queue(), ^{
-            [[[UIAlertView alloc] initWithTitle:DBCameraLocalizedStrings(@"general.error.title") message:DBCameraLocalizedStrings(@"pickerimage.nopolicy") delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil] show];
+            UIAlertController *alert = [UIAlertController alertControllerWithTitle:DBCameraLocalizedStrings(@"general.error.title") message:DBCameraLocalizedStrings(@"pickerimage.nopolicy") preferredStyle:UIAlertControllerStyleAlert];
+            [alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil]];
+            [alert addAction:[UIAlertAction actionWithTitle:@"Settings" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+                [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString]];
+            }]];
+            [self presentViewController:alert animated:true completion:nil];
         });
     }
 }
